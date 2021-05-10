@@ -421,12 +421,39 @@ public class Map : MonoBehaviour
     public void MoveTile(int x, int y)
     {
         AddLayers(mapData.Depth[x, y]);
-        for (int i = 0; i < mapData.Depth[x, y]; i++)
+
+        int[] directionX = { -1, 0, 1 }, directionY = { -1, 0, 1 };
+        bool needSide = true;
+        for (int i = mapData.Depth[x, y] - 1; i >= 0; i--)
         {
-            layers[i].ChangeSprite(x, y, true);
-            layers[i].SetActive(x, y, true);
-            layers[i].TileSprites[x, y].spriteRenderer.color = GetLayerShade(i);
+            // display the sprites above depth[x, y] only if any of 8 adjucent cells (cardinal or diagonal direction) is higher
+            if (needSide)
+            {
+                needSide = false;
+                foreach (int dirX in directionX)
+                {
+                    foreach (int dirY in directionY)
+                    {
+                        if (dirX == 0 && dirY == 0) continue;
+                        if (!mapData.InMap(new Vector2Int(x + dirX, y + dirY))) continue;
+                        if (mapData.Depth[x + dirX, y + dirY] <= mapData.Depth[x, y])
+                        {
+                            needSide = true;
+                            break;
+                        }
+                    }
+                    if (needSide) break;
+                }
+            }
+            if (needSide)
+            {
+                layers[i].ChangeSprite(x, y, true);
+                layers[i].SetActive(x, y, true);
+                layers[i].TileSprites[x, y].spriteRenderer.color = GetLayerShade(i);
+            }
+            else layers[i].SetActive(x, y, false);
         }
+
         layers[mapData.Depth[x, y]].ChangeSprite(x, y, false);
         layers[mapData.Depth[x, y]].SetActive(x, y, true);
         layers[mapData.Depth[x, y]].TileSprites[x, y].spriteRenderer.color = GetLayerShade(mapData.Depth[x, y]);
