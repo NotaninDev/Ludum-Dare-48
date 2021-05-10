@@ -389,28 +389,36 @@ public class MapData
                 case Direction.Up:
                     foreach (Edge edge in connectedEdges)
                     {
-                        if (edge.Horizontal) canMove &= !Rocks.Contains(edge.Position) && GetDepth(edge.Position) >= PlayerDepth;
+                        if (edge.Horizontal) canMove &= !(GetDepth(edge.Position) == edge.Depth && Rocks.Contains(edge.Position)) && GetDepth(edge.Position) >= PlayerDepth;
                         else canMove &= GetEdgeDepth(edge.Position + Vector2Int.up, false) >= PlayerDepth;
                     }
                     break;
                 case Direction.Right:
                     foreach (Edge edge in connectedEdges)
                     {
-                        if (!edge.Horizontal) canMove &= !Rocks.Contains(edge.Position) && GetDepth(edge.Position) >= PlayerDepth;
+                        if (!edge.Horizontal) canMove &= !(GetDepth(edge.Position) == edge.Depth && Rocks.Contains(edge.Position)) && GetDepth(edge.Position) >= PlayerDepth;
                         else canMove &= GetEdgeDepth(edge.Position + Vector2Int.right, true) >= PlayerDepth;
                     }
                     break;
                 case Direction.Down:
                     foreach (Edge edge in connectedEdges)
                     {
-                        if (edge.Horizontal) canMove &= !Rocks.Contains(edge.Position + Vector2Int.down) && GetDepth(edge.Position + Vector2Int.down) >= PlayerDepth;
+                        if (edge.Horizontal)
+                        {
+                            canMove &= !(GetDepth(edge.Position + Vector2Int.down) == edge.Depth && Rocks.Contains(edge.Position + Vector2Int.down)) &&
+                                GetDepth(edge.Position + Vector2Int.down) >= PlayerDepth;
+                        }
                         else canMove &= GetEdgeDepth(edge.Position + Vector2Int.down, false) >= PlayerDepth;
                     }
                     break;
                 case Direction.Left:
                     foreach (Edge edge in connectedEdges)
                     {
-                        if (!edge.Horizontal) canMove &= !Rocks.Contains(edge.Position + Vector2Int.left) && GetDepth(edge.Position + Vector2Int.left) >= PlayerDepth;
+                        if (!edge.Horizontal)
+                        {
+                            canMove &= !(GetDepth(edge.Position + Vector2Int.left) == edge.Depth && Rocks.Contains(edge.Position + Vector2Int.left)) &&
+                                GetDepth(edge.Position + Vector2Int.left) >= PlayerDepth;
+                        }
                         else canMove &= GetEdgeDepth(edge.Position + Vector2Int.left, true) >= PlayerDepth;
                     }
                     break;
