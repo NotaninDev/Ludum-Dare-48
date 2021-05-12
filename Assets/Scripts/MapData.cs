@@ -321,12 +321,6 @@ public class MapData
         public int[] FallDistance;
         public bool[] Overlapped, UsedInLoop, FallInExcavation;
         public bool[,] Excavated;
-        //////////////////////////////////////
-        //                                  //
-        // implement PlayerFallInExcavation //
-        //                                  //
-        //////////////////////////////////////
-        public bool PlayerFallInExcavation { get; set; }
         public int PlayerFallDistance { get; set; }
         public int MaxFallDistance { get; set; }
         public MicroHistory(int edgeCount, Vector2Int Size)
@@ -336,7 +330,6 @@ public class MapData
             UsedInLoop = new bool[edgeCount];
             FallInExcavation = new bool[edgeCount];
             Excavated = new bool[Size.x, Size.y];
-            PlayerFallInExcavation = false;
             PlayerFallDistance = 0;
             MaxFallDistance = 0;
         }
@@ -773,6 +766,8 @@ public class MapData
                     }
                 }
             }
+
+            if (microHistory.Excavated[Player.x, Player.y]) PlayerDepth++;
 
             // register edges used in loops
             for (int i = 0; i < Edges.Count; i++)
