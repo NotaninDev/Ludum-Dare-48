@@ -321,6 +321,12 @@ public class MapData
         public int[] FallDistance;
         public bool[] Overlapped, UsedInLoop, FallInExcavation;
         public bool[,] Excavated;
+        //////////////////////////////////////
+        //                                  //
+        // implement PlayerFallInExcavation //
+        //                                  //
+        //////////////////////////////////////
+        public bool PlayerFallInExcavation { get; set; }
         public int PlayerFallDistance { get; set; }
         public int MaxFallDistance { get; set; }
         public MicroHistory(int edgeCount, Vector2Int Size)
@@ -330,6 +336,7 @@ public class MapData
             UsedInLoop = new bool[edgeCount];
             FallInExcavation = new bool[edgeCount];
             Excavated = new bool[Size.x, Size.y];
+            PlayerFallInExcavation = false;
             PlayerFallDistance = 0;
             MaxFallDistance = 0;
         }
@@ -694,142 +701,133 @@ public class MapData
         bool excavated = false;
         for (int layer = maxCellDepth; layer >= 0; layer--)
         {
-            // repeat until there is no loop left in this layer
-            bool foundLoop = true;
-            while (foundLoop)
+            // find edges in the layer
+            List<Edge> edgesInLayer = new List<Edge>();
+            foreach (Edge edge in Edges)
             {
-                foundLoop = false;
+                if (edge.Active && edge.Depth == layer) edgesInLayer.Add(edge);
+            }
 
-                // find edges in the layer
-                List<Edge> edgesInLayer = new List<Edge>();
-                foreach (Edge edge in Edges)
+            // find enclosed cells
+            // use cells outside of the map
+            // e.g. since (-1, -1) cannot be enclosed, notEnclosed[0, 0] is true
+            bool[,] notEnclosed = new bool[Size.x + 2, Size.y + 2];
+            Stack<Vector2Int> checkingCells = new Stack<Vector2Int>();
+            checkingCells.Push(new Vector2Int(-1, -1));
+            notEnclosed[0, 0] = true;
+            while (checkingCells.Count > 0)
+            {
+                Vector2Int checkingCell = checkingCells.Pop();
+                foreach (Direction direction in Enum.GetValues(typeof(Direction)))
                 {
-                    if (edge.Active && edge.Depth == layer) edgesInLayer.Add(edge);
-                }
-
-                // find enclosed cells
-                // use cells outside of the map
-                // e.g. since (-1, -1) cannot be enclosed, notEnclosed[0, 0] is true
-                bool[,] notEnclosed = new bool[Size.x + 2, Size.y + 2];
-                Stack<Vector2Int> checkingCells = new Stack<Vector2Int>();
-                checkingCells.Push(new Vector2Int(-1, -1));
-                notEnclosed[0, 0] = true;
-                while (checkingCells.Count > 0)
-                {
-                    Vector2Int checkingCell = checkingCells.Pop();
-                    foreach (Direction direction in Enum.GetValues(typeof(Direction)))
+                    Vector2Int candidate = checkingCell + directionDictionary[(int)direction];
+                    if (candidate.x < -1 || candidate.y < -1 || candidate.x > Size.x || candidate.y > Size.y) continue;
+                    if (notEnclosed[candidate.x + 1, candidate.y + 1]) continue;
+                    switch (direction)
                     {
-                        Vector2Int candidate = checkingCell + directionDictionary[(int)direction];
-                        if (candidate.x < -1 || candidate.y < -1 || candidate.x > Size.x || candidate.y > Size.y) continue;
-                        if (notEnclosed[candidate.x + 1, candidate.y + 1]) continue;
-                        switch (direction)
-                        {
-                            case Direction.Up:
-                                if (FindEdge(candidate, true, layer, edgesInLayer) < 0)
-                                {
-                                    notEnclosed[candidate.x + 1, candidate.y + 1] = true;
-                                    checkingCells.Push(candidate);
-                                }
-                                break;
-                            case Direction.Right:
-                                if (FindEdge(candidate, false, layer, edgesInLayer) < 0)
-                                {
-                                    notEnclosed[candidate.x + 1, candidate.y + 1] = true;
-                                    checkingCells.Push(candidate);
-                                }
-                                break;
-                            case Direction.Down:
-                                if (FindEdge(checkingCell, true, layer, edgesInLayer) < 0)
-                                {
-                                    notEnclosed[candidate.x + 1, candidate.y + 1] = true;
-                                    checkingCells.Push(candidate);
-                                }
-                                break;
-                            case Direction.Left:
-                                if (FindEdge(checkingCell, false, layer, edgesInLayer) < 0)
-                                {
-                                    notEnclosed[candidate.x + 1, candidate.y + 1] = true;
-                                    checkingCells.Push(candidate);
-                                }
-                                break;
-                            default:
-                                Debug.LogWarning($"MapData.SimulateLogic-find enclosed cells: not implemented for Direction {Enum.GetName(typeof(Direction), direction)}");
-                                continue;
-                        }
-                    }
-                }
-
-                // excavate cells inside the found loop
-                for (int i = 0; i < Size.x; i++)
-                {
-                    for (int j = 0; j < Size.y; j++)
-                    {
-                        if (!notEnclosed[i + 1, j + 1] && Depth[i, j] == layer)
-                        {
-                            foundLoop = true;
-                            microHistory.Excavated[i, j] = true;
-                            Depth[i, j]++;
-                        }
-                    }
-                }
-
-                if (foundLoop) excavated = true;
-
-                // register edges used in loops
-                for (int i = 0; i < Edges.Count; i++)
-                {
-                    Edge edge = Edges[i];
-                    if (edge.Active && edge.Depth == layer)
-                    {
-                        if (edge.Horizontal)
-                        {
-                            if (notEnclosed[edge.Position.x + 1, edge.Position.y] != notEnclosed[edge.Position.x + 1, edge.Position.y + 1])
+                        case Direction.Up:
+                            if (FindEdge(candidate, true, layer, edgesInLayer) < 0)
                             {
-                                microHistory.UsedInLoop[i] = true;
+                                notEnclosed[candidate.x + 1, candidate.y + 1] = true;
+                                checkingCells.Push(candidate);
                             }
-                        }
-                        else
-                        {
-                            if (notEnclosed[edge.Position.x, edge.Position.y + 1] != notEnclosed[edge.Position.x + 1, edge.Position.y + 1])
+                            break;
+                        case Direction.Right:
+                            if (FindEdge(candidate, false, layer, edgesInLayer) < 0)
                             {
-                                microHistory.UsedInLoop[i] = true;
+                                notEnclosed[candidate.x + 1, candidate.y + 1] = true;
+                                checkingCells.Push(candidate);
                             }
+                            break;
+                        case Direction.Down:
+                            if (FindEdge(checkingCell, true, layer, edgesInLayer) < 0)
+                            {
+                                notEnclosed[candidate.x + 1, candidate.y + 1] = true;
+                                checkingCells.Push(candidate);
+                            }
+                            break;
+                        case Direction.Left:
+                            if (FindEdge(checkingCell, false, layer, edgesInLayer) < 0)
+                            {
+                                notEnclosed[candidate.x + 1, candidate.y + 1] = true;
+                                checkingCells.Push(candidate);
+                            }
+                            break;
+                        default:
+                            Debug.LogWarning($"MapData.SimulateLogic-find enclosed cells: not implemented for Direction {Enum.GetName(typeof(Direction), direction)}");
+                            continue;
+                    }
+                }
+            }
+
+            // excavate cells inside the found loop
+            for (int i = 0; i < Size.x; i++)
+            {
+                for (int j = 0; j < Size.y; j++)
+                {
+                    if (!notEnclosed[i + 1, j + 1] && Depth[i, j] == layer)
+                    {
+                        excavated = true;
+                        microHistory.Excavated[i, j] = true;
+                        Depth[i, j]++;
+                    }
+                }
+            }
+
+            // register edges used in loops
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                Edge edge = Edges[i];
+                if (edge.Active && edge.Depth == layer)
+                {
+                    if (edge.Horizontal)
+                    {
+                        if (notEnclosed[edge.Position.x + 1, edge.Position.y] != notEnclosed[edge.Position.x + 1, edge.Position.y + 1])
+                        {
+                            microHistory.UsedInLoop[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        if (notEnclosed[edge.Position.x, edge.Position.y + 1] != notEnclosed[edge.Position.x + 1, edge.Position.y + 1])
+                        {
+                            microHistory.UsedInLoop[i] = true;
                         }
                     }
                 }
+            }
 
-                // find edges that fall during the excavation
-                bool[] visited = new bool[Edges.Count];
-                for (int i = 0; i < Edges.Count; i++)
+            // find edges that fall during the excavation
+            bool[] visited = new bool[Edges.Count];
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                if (!Edges[i].Active || microHistory.UsedInLoop[i] || Edges[i].Depth != layer || visited[i]) continue;
+                List<Edge> connectedEdges;
+                connectedEdges = GetConnectedEdges(Edges, i);
+
+                bool fallInExcavation = true;
+                for (int j = i; j < Edges.Count; j++)
                 {
-                    if (!Edges[i].Active || microHistory.UsedInLoop[i] || Edges[i].Depth != layer || visited[i]) continue;
-                    List<Edge> connectedEdges;
-                    connectedEdges = GetConnectedEdges(Edges, i);
+                    if (!connectedEdges.Contains(Edges[j])) continue;
+                    visited[j] = true;
+                    fallInExcavation &= !(microHistory.UsedInLoop[j] || GetEdgeDepth(Edges[j].Position, Edges[j].Horizontal) == layer);
+                }
 
-                    bool fallInExcavation = true;
+                if (fallInExcavation)
+                {
                     for (int j = i; j < Edges.Count; j++)
                     {
                         if (!connectedEdges.Contains(Edges[j])) continue;
-                        visited[j] = true;
-                        fallInExcavation &= !(microHistory.UsedInLoop[j] || GetEdgeDepth(Edges[j].Position, Edges[j].Horizontal) == layer);
-                    }
-
-                    if (fallInExcavation)
-                    {
-                        for (int j = i; j < Edges.Count; j++)
-                        {
-                            if (!connectedEdges.Contains(Edges[j])) continue;
-                            microHistory.FallInExcavation[j] = true;
-                            Edges[j].ChangeDepth(layer + 1);
-                        }
+                        microHistory.FallInExcavation[j] = true;
+                        Edges[j].ChangeDepth(layer + 1);
                     }
                 }
+            }
 
-                // remove edges used in loops
-                for (int i = 0; i < Edges.Count; i++)
-                {
-                    if (microHistory.UsedInLoop[i]) Edges[i].SetActive(false);
-                }
+            // remove edges used in loops
+            for (int i = 0; i < Edges.Count; i++)
+            {
+                if (microHistory.UsedInLoop[i]) Edges[i].SetActive(false);
             }
         }
 
