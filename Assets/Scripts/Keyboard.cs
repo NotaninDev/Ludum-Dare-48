@@ -13,7 +13,7 @@ public class Keyboard : MonoBehaviour
 
     private GameObject controlObject;
     private SpriteBox controlSprite;
-    private const int KeyNumber = 15;
+    private const int KeyNumber = 12;
     private GameObject[] keyObjects;
     private Option[] keys;
     private int selectedOption;
@@ -23,8 +23,8 @@ public class Keyboard : MonoBehaviour
     [Serializable]
     public class Preference
     {
-        public KeyCode KeySelect, KeyMenu, KeyUp, KeyLeft, KeyDown, KeyRight, KeyClockwise, KeyCounterclockwise,
-            KeyUndo, KeyReset, KeySwitch, KeyFaceUp, KeyFaceLeft, KeyFaceDown, KeyFaceRight;
+        public KeyCode KeySelect, KeyMenu, KeyUp, KeyLeft, KeyDown, KeyRight,
+            KeyUndo, KeyReset, KeyPlayerUp, KeyPlayerLeft, KeyPlayerDown, KeyPlayerRight;
         public Preference()
         {
             if (defaultKeys != null && defaultKeys.Length >= KeyNumber)
@@ -35,15 +35,12 @@ public class Keyboard : MonoBehaviour
                 KeyLeft = defaultKeys[3];
                 KeyDown = defaultKeys[4];
                 KeyRight = defaultKeys[5];
-                KeyClockwise = defaultKeys[6];
-                KeyCounterclockwise = defaultKeys[7];
-                KeyUndo = defaultKeys[8];
-                KeyReset = defaultKeys[9];
-                KeySwitch = defaultKeys[10];
-                KeyFaceUp = defaultKeys[11];
-                KeyFaceLeft = defaultKeys[12];
-                KeyFaceDown = defaultKeys[13];
-                KeyFaceRight = defaultKeys[14];
+                KeyUndo = defaultKeys[6];
+                KeyReset = defaultKeys[7];
+                KeyPlayerUp = defaultKeys[8];
+                KeyPlayerLeft = defaultKeys[9];
+                KeyPlayerDown = defaultKeys[10];
+                KeyPlayerRight = defaultKeys[11];
             }
             else
             {
@@ -65,42 +62,38 @@ public class Keyboard : MonoBehaviour
             keys[i] = keyObjects[i].AddComponent<Option>();
         }
 
-        keyObjects[15].name = "Text Menu";
-        keyObjects[16].name = "Text Gameplay";
-        keyObjects[17].name = "Text Back";
-        keyObjects[18].name = "Text Default";
+        keyObjects[KeyNumber].name = "Text Menu";
+        keyObjects[KeyNumber + 1].name = "Text Gameplay";
+        keyObjects[KeyNumber + 2].name = "Text Back";
+        keyObjects[KeyNumber + 3].name = "Text Default";
     }
 
-    void Start()
+    public void InitializeNonStatic()
     {
-        //controlSprite.Initialize(Graphics.optionBox[1], "UI", 2, new Vector3(0, 0, 0));
-        //controlSprite.spriteRenderer.drawMode = SpriteDrawMode.Sliced;
-        //controlSprite.spriteRenderer.size = new Vector2(11.8f, 7.84f);
         for (int i = 0; i < 6; i++)
         {
             keyObjects[i].transform.localPosition = new Vector3(-3.2f, 3.36f - i * .84f, 0);
-            keys[i].Initialize("UI", 3, Graphics.optionBox[1], 1f, 1.2f, 4, null, Graphics.Font.Mops, 5.4f, Graphics.Green, new Vector2(5.8f, .66f), true,
+            keys[i].Initialize("UI", 3, Graphics.optionBox[0], 1f, 1.2f, 4, null, Graphics.Font.Mops, 5.4f, Graphics.Green, new Vector2(5.8f, .66f), true,
                 alignment: TextAlignmentOptions.MidlineLeft, textAreaSize: new Vector2(5.4f, 1f), useCollider: true);
         }
         for (int i = 6; i < KeyNumber; i++)
         {
             keyObjects[i].transform.localPosition = new Vector3(3.2f, 3.36f - (i - 6) * .84f, 0);
-            keys[i].Initialize("UI", 3, Graphics.optionBox[1], 1f, 1.2f, 4, null, Graphics.Font.Mops, 5.4f, Graphics.Green, new Vector2(5.8f, .66f), true,
+            keys[i].Initialize("UI", 3, Graphics.optionBox[0], 1f, 1.2f, 4, null, Graphics.Font.Mops, 5.4f, Graphics.Green, new Vector2(5.8f, .66f), true,
                 alignment: TextAlignmentOptions.MidlineLeft, textAreaSize: new Vector2(5.4f, 1f), useCollider: true);
         }
 
-        keyObjects[15].transform.localPosition = new Vector3(-3.2f, 4.28f, 0);
-        keys[15].Initialize("UI", 3, Graphics.optionBox[1], 1f, 1.2f, 4, "Menu", Graphics.Font.Mops, 6f, Graphics.BlackBrown, new Vector2(.6f, .12f), false);
-        keyObjects[16].transform.localPosition = new Vector3(3.2f, 4.28f, 0);
-        keys[16].Initialize("UI", 3, Graphics.optionBox[1], 1f, 1.2f, 4, "Gameplay", Graphics.Font.Mops, 6f, Graphics.BlackBrown, new Vector2(.6f, .12f), false);
-        keyObjects[17].transform.localPosition = new Vector3(-3.2f, -4.28f, 0);
-        keys[17].Initialize("UI", 3, Graphics.optionBox[1], 1f, 1.2f, 4, "Back", Graphics.Font.Mops, 6f, Graphics.Brown, new Vector2(.6f, .12f), false, useCollider: true);
-        keyObjects[18].transform.localPosition = new Vector3(3.2f, -4.28f, 0);
-        keys[18].Initialize("UI", 3, Graphics.optionBox[1], 1f, 1.2f, 4, "Default", Graphics.Font.Mops, 6f, Graphics.Brown, new Vector2(.6f, .12f), false, useCollider: true);
+        keyObjects[KeyNumber].transform.localPosition = new Vector3(-3.2f, 4.28f, 0);
+        keys[KeyNumber].Initialize("UI", 3, Graphics.optionBox[0], 1f, 1.2f, 4, "Menu", Graphics.Font.Mops, 6f, Graphics.BlackBrown, new Vector2(.6f, .12f), false);
+        keyObjects[KeyNumber + 1].transform.localPosition = new Vector3(3.2f, 4.28f, 0);
+        keys[KeyNumber + 1].Initialize("UI", 3, Graphics.optionBox[0], 1f, 1.2f, 4, "Gameplay", Graphics.Font.Mops, 6f, Graphics.BlackBrown, new Vector2(.6f, .12f), false);
+        keyObjects[KeyNumber + 2].transform.localPosition = new Vector3(-3.2f, -4.28f, 0);
+        keys[KeyNumber + 2].Initialize("UI", 3, Graphics.optionBox[0], 1f, 1.2f, 4, "Back", Graphics.Font.Mops, 6f, Graphics.Green, new Vector2(.6f, .12f), false, useCollider: true);
+        keyObjects[KeyNumber + 3].transform.localPosition = new Vector3(3.2f, -4.28f, 0);
+        keys[KeyNumber + 3].Initialize("UI", 3, Graphics.optionBox[0], 1f, 1.2f, 4, "Default", Graphics.Font.Mops, 6f, Graphics.Green, new Vector2(.6f, .12f), false, useCollider: true);
 
         for (int i = 0; i < KeyNumber; i++) keys[i].ChangeText(GetControlName(i) + ": " + GetKeyName(i));
     }
-
     public static void Initialize()
     {
         defaultKeys = new KeyCode[KeyNumber];
@@ -111,15 +104,12 @@ public class Keyboard : MonoBehaviour
         defaultKeys[3] = KeyCode.LeftArrow;
         defaultKeys[4] = KeyCode.DownArrow;
         defaultKeys[5] = KeyCode.RightArrow;
-        defaultKeys[6] = KeyCode.C;
-        defaultKeys[7] = KeyCode.X;
-        defaultKeys[8] = KeyCode.Z;
-        defaultKeys[9] = KeyCode.R;
-        defaultKeys[10] = KeyCode.Space;
-        defaultKeys[11] = KeyCode.UpArrow;
-        defaultKeys[12] = KeyCode.LeftArrow;
-        defaultKeys[13] = KeyCode.DownArrow;
-        defaultKeys[14] = KeyCode.RightArrow;
+        defaultKeys[6] = KeyCode.Z;
+        defaultKeys[7] = KeyCode.R;
+        defaultKeys[8] = KeyCode.UpArrow;
+        defaultKeys[9] = KeyCode.LeftArrow;
+        defaultKeys[10] = KeyCode.DownArrow;
+        defaultKeys[11] = KeyCode.RightArrow;
         for (int i = 0; i < KeyNumber; i++) assinedKeys[i, 0] = defaultKeys[i];
 
         // load key mapping
@@ -136,15 +126,12 @@ public class Keyboard : MonoBehaviour
                 assinedKeys[3, 0] = preference.KeyLeft;
                 assinedKeys[4, 0] = preference.KeyDown;
                 assinedKeys[5, 0] = preference.KeyRight;
-                assinedKeys[6, 0] = preference.KeyClockwise;
-                assinedKeys[7, 0] = preference.KeyCounterclockwise;
-                assinedKeys[8, 0] = preference.KeyUndo;
-                assinedKeys[9, 0] = preference.KeyReset;
-                assinedKeys[10, 0] = preference.KeySwitch;
-                assinedKeys[11, 0] = preference.KeyFaceUp;
-                assinedKeys[12, 0] = preference.KeyFaceLeft;
-                assinedKeys[13, 0] = preference.KeyFaceDown;
-                assinedKeys[14, 0] = preference.KeyFaceRight;
+                assinedKeys[6, 0] = preference.KeyUndo;
+                assinedKeys[7, 0] = preference.KeyReset;
+                assinedKeys[8, 0] = preference.KeyPlayerUp;
+                assinedKeys[9, 0] = preference.KeyPlayerLeft;
+                assinedKeys[10, 0] = preference.KeyPlayerDown;
+                assinedKeys[11, 0] = preference.KeyPlayerRight;
             }
             catch (Exception e)
             {
@@ -153,6 +140,291 @@ public class Keyboard : MonoBehaviour
         }
 
         for (int i = 0; i < KeyNumber; i++) assinedKeys[i, 1] = GetPairKey(assinedKeys[i, 0]);
+    }
+    public void ResetPosition()
+    {
+        selectedOption = 0;
+        keys[0].SetSelected(true);
+        for (int i = 1; i < KeyNumber + 4; i++) keys[i].SetSelected(false);
+        waitingInput = false;
+    }
+    // returns true when the control menu is closed
+    public bool HandleInput()
+    {
+        if (waitingInput)
+        {
+            KeyCode inputKey = CheckKeyInput();
+            if (inputKey != KeyCode.None)
+            {
+                switch (selectedOption)
+                {
+                    case 0:
+                    case 1:
+                        for (int i = 0; i < 6; i++)
+                        {
+                            if (i == selectedOption) continue;
+                            if (assinedKeys[i, 0] == inputKey || assinedKeys[i, 1] == inputKey)
+                            {
+                                AssignKey(i, assinedKeys[selectedOption, 0]);
+                                break;
+                            }
+                        }
+                        for (int i = 6; i < KeyNumber; i++)
+                        {
+                            if (assinedKeys[i, 0] == inputKey || assinedKeys[i, 1] == inputKey)
+                            {
+                                AssignKey(i, assinedKeys[selectedOption, 0]);
+                                break;
+                            }
+                        }
+                        AssignKey(selectedOption, inputKey);
+                        waitingInput = false;
+                        return false;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        for (int i = 0; i < 6; i++)
+                        {
+                            if (i == selectedOption) continue;
+                            if (assinedKeys[i, 0] == inputKey || assinedKeys[i, 1] == inputKey)
+                            {
+                                if (i == 0 || i == 1)
+                                {
+                                    for (int j = 6; j < KeyNumber; j++)
+                                    {
+                                        if (assinedKeys[j, 0] == assinedKeys[selectedOption, 0] || assinedKeys[j, 1] == assinedKeys[selectedOption, 0])
+                                        {
+                                            AssignKey(j, inputKey);
+                                            break;
+                                        }
+                                    }
+                                }
+                                AssignKey(i, assinedKeys[selectedOption, 0]);
+                                break;
+                            }
+                        }
+                        AssignKey(selectedOption, inputKey);
+                        waitingInput = false;
+                        return false;
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                        for (int i = 0; i < 2; i++)
+                        {
+                            if (assinedKeys[i, 0] == inputKey || assinedKeys[i, 1] == inputKey)
+                            {
+                                for (int j = 2; j < 6; j++)
+                                {
+                                    if (assinedKeys[j, 0] == assinedKeys[selectedOption, 0] || assinedKeys[j, 1] == assinedKeys[selectedOption, 0])
+                                    {
+                                        AssignKey(j, inputKey);
+                                        break;
+                                    }
+                                }
+                                AssignKey(i, assinedKeys[selectedOption, 0]);
+                                break;
+                            }
+                        }
+                        for (int i = 6; i < KeyNumber; i++)
+                        {
+                            if (i == selectedOption) continue;
+                            if (assinedKeys[i, 0] == inputKey || assinedKeys[i, 1] == inputKey)
+                            {
+                                AssignKey(i, assinedKeys[selectedOption, 0]);
+                                break;
+                            }
+                        }
+                        AssignKey(selectedOption, inputKey);
+                        waitingInput = false;
+                        return false;
+                    default:
+                        Debug.LogWarning(String.Format("HandleInput-waiting: not implemented for option {0}", selectedOption));
+                        waitingInput = false;
+                        break;
+                }
+            }
+        }
+        else
+        {
+            // detect mouse hover
+            for (int i = 0; i < KeyNumber + 4; i++)
+            {
+                if (i == KeyNumber || i == KeyNumber + 1) continue;
+                if (keys[i].Mouse.GetMouseEnter())
+                {
+                    keys[selectedOption].SetSelected(false);
+                    selectedOption = i;
+                    keys[selectedOption].SetSelected(true);
+                    return false;
+                }
+            }
+
+            if (GetSelect() || keys[selectedOption].Mouse.GetMouseClick())
+            {
+                switch (selectedOption)
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                        keys[selectedOption].ChangeText(GetControlName(selectedOption) + ": <color=#402b18>waiting...</color>");
+                        waitingInput = true;
+                        return false;
+                    case 14:
+                        SaveKeyMapping();
+                        return true;
+                    case 15:
+                        for (int i = 0; i < KeyNumber; i++) AssignKey(i, defaultKeys[i]);
+                        return false;
+                    default:
+                        Debug.LogWarning(String.Format("HandleInput-select: not implemented for option {0}", selectedOption));
+                        break;
+                }
+            }
+            if (GetCancel())
+            {
+                SaveKeyMapping();
+                return true;
+            }
+            if (GetDown())
+            {
+                switch (selectedOption)
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption++;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 5:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 14;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 11:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 15;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 14:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 0;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 15:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 6;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    default:
+                        Debug.LogWarning(String.Format("HandleInput-down: not implemented for option {0}", selectedOption));
+                        break;
+                }
+            }
+            if (GetUp())
+            {
+                switch (selectedOption)
+                {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption--;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 0:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 14;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 6:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 15;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 14:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 5;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 15:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 11;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    default:
+                        Debug.LogWarning(String.Format("HandleInput-up: not implemented for option {0}", selectedOption));
+                        break;
+                }
+            }
+            if (GetRight() || GetLeft())
+            {
+                switch (selectedOption)
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption += 6;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption -= 6;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 14:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 15;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    case 15:
+                        keys[selectedOption].SetSelected(false);
+                        selectedOption = 14;
+                        keys[selectedOption].SetSelected(true);
+                        return false;
+                    default:
+                        Debug.LogWarning(String.Format("HandleInput-right/left: not implemented for option {0}", selectedOption));
+                        break;
+                }
+            }
+        }
+        return false;
     }
     private static void SaveKeyMapping()
     {
@@ -164,15 +436,12 @@ public class Keyboard : MonoBehaviour
         preference.KeyLeft = assinedKeys[3, 0];
         preference.KeyDown = assinedKeys[4, 0];
         preference.KeyRight = assinedKeys[5, 0];
-        preference.KeyClockwise = assinedKeys[6, 0];
-        preference.KeyCounterclockwise = assinedKeys[7, 0];
-        preference.KeyUndo = assinedKeys[8, 0];
-        preference.KeyReset = assinedKeys[9, 0];
-        preference.KeySwitch = assinedKeys[10, 0];
-        preference.KeyFaceUp = assinedKeys[11, 0];
-        preference.KeyFaceLeft = assinedKeys[12, 0];
-        preference.KeyFaceDown = assinedKeys[13, 0];
-        preference.KeyFaceRight = assinedKeys[14, 0];
+        preference.KeyUndo = assinedKeys[6, 0];
+        preference.KeyReset = assinedKeys[7, 0];
+        preference.KeyPlayerUp = assinedKeys[8, 0];
+        preference.KeyPlayerLeft = assinedKeys[9, 0];
+        preference.KeyPlayerDown = assinedKeys[10, 0];
+        preference.KeyPlayerRight = assinedKeys[11, 0];
         encodedPreference = JsonUtility.ToJson(preference);
         try
         {
@@ -201,22 +470,16 @@ public class Keyboard : MonoBehaviour
             case 5:
                 return "Right";
             case 6:
-                return "Clockwise";
-            case 7:
-                return "Anticlockwise";
-            case 8:
                 return "Undo";
-            case 9:
+            case 7:
                 return "Reset";
-            case 10:
-                return "Switch";
-            case 11:
+            case 8:
                 return "Player Up";
-            case 12:
+            case 9:
                 return "Player Left";
-            case 13:
+            case 10:
                 return "Player Down";
-            case 14:
+            case 11:
                 return "Player Right";
             default:
                 Debug.LogWarning(String.Format("GetControlName: not implemented for number {0}", n));
@@ -239,25 +502,18 @@ public class Keyboard : MonoBehaviour
                 return 4;
             case "Left":
                 return 5;
-            case "Clockwise":
-                return 6;
-            case "Anticlockwise":
-            case "Counterclockwise":
-                return 7;
             case "Undo":
-                return 8;
+                return 6;
             case "Reset":
-                return 9;
-            case "Switch":
-                return 10;
+                return 7;
             case "Player Up":
-                return 11;
+                return 8;
             case "Player Right":
-                return 12;
+                return 9;
             case "Player Down":
-                return 13;
+                return 10;
             case "Player Left":
-                return 14;
+                return 11;
             default:
                 return -1;
         }
@@ -727,28 +983,22 @@ public class Keyboard : MonoBehaviour
     { return pressedDown ? Input.GetKeyDown(assinedKeys[4, 0]) || Input.GetKeyDown(assinedKeys[4, 1]) : Input.GetKey(assinedKeys[4, 0]) || Input.GetKey(assinedKeys[4, 1]); }
     public static bool GetRight(bool pressedDown = true)
     { return pressedDown ? Input.GetKeyDown(assinedKeys[5, 0]) || Input.GetKeyDown(assinedKeys[5, 1]) : Input.GetKey(assinedKeys[5, 0]) || Input.GetKey(assinedKeys[5, 1]); }
-    public static bool GetClockwise(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[6, 0]) || Input.GetKeyDown(assinedKeys[6, 1]) : Input.GetKey(assinedKeys[6, 0]) || Input.GetKey(assinedKeys[6, 1]); }
-    public static bool GetCounterclockwise(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[7, 0]) || Input.GetKeyDown(assinedKeys[7, 1]) : Input.GetKey(assinedKeys[7, 0]) || Input.GetKey(assinedKeys[7, 1]); }
     public static bool GetUndo(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[8, 0]) || Input.GetKeyDown(assinedKeys[8, 1]) : Input.GetKey(assinedKeys[8, 0]) || Input.GetKey(assinedKeys[8, 1]); }
+    { return pressedDown ? Input.GetKeyDown(assinedKeys[6, 0]) || Input.GetKeyDown(assinedKeys[6, 1]) : Input.GetKey(assinedKeys[6, 0]) || Input.GetKey(assinedKeys[6, 1]); }
     public static bool GetReset(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[9, 0]) || Input.GetKeyDown(assinedKeys[9, 1]) : Input.GetKey(assinedKeys[9, 0]) || Input.GetKey(assinedKeys[9, 1]); }
-    public static bool GetSwitch(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[10, 0]) || Input.GetKeyDown(assinedKeys[10, 1]) : Input.GetKey(assinedKeys[10, 0]) || Input.GetKey(assinedKeys[10, 1]); }
+    { return pressedDown ? Input.GetKeyDown(assinedKeys[7, 0]) || Input.GetKeyDown(assinedKeys[7, 1]) : Input.GetKey(assinedKeys[7, 0]) || Input.GetKey(assinedKeys[7, 1]); }
     public static bool GetPlayerUp(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[11, 0]) || Input.GetKeyDown(assinedKeys[11, 1]) : Input.GetKey(assinedKeys[11, 0]) || Input.GetKey(assinedKeys[11, 1]); }
+    { return pressedDown ? Input.GetKeyDown(assinedKeys[8, 0]) || Input.GetKeyDown(assinedKeys[8, 1]) : Input.GetKey(assinedKeys[8, 0]) || Input.GetKey(assinedKeys[8, 1]); }
     public static bool GetPlayerLeft(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[12, 0]) || Input.GetKeyDown(assinedKeys[12, 1]) : Input.GetKey(assinedKeys[12, 0]) || Input.GetKey(assinedKeys[12, 1]); }
+    { return pressedDown ? Input.GetKeyDown(assinedKeys[9, 0]) || Input.GetKeyDown(assinedKeys[9, 1]) : Input.GetKey(assinedKeys[9, 0]) || Input.GetKey(assinedKeys[9, 1]); }
     public static bool GetPlayerDown(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[13, 0]) || Input.GetKeyDown(assinedKeys[13, 1]) : Input.GetKey(assinedKeys[13, 0]) || Input.GetKey(assinedKeys[13, 1]); }
+    { return pressedDown ? Input.GetKeyDown(assinedKeys[10, 0]) || Input.GetKeyDown(assinedKeys[10, 1]) : Input.GetKey(assinedKeys[10, 0]) || Input.GetKey(assinedKeys[10, 1]); }
     public static bool GetPlayerRight(bool pressedDown = true)
-    { return pressedDown ? Input.GetKeyDown(assinedKeys[14, 0]) || Input.GetKeyDown(assinedKeys[14, 1]) : Input.GetKey(assinedKeys[14, 0]) || Input.GetKey(assinedKeys[14, 1]); }
+    { return pressedDown ? Input.GetKeyDown(assinedKeys[11, 0]) || Input.GetKeyDown(assinedKeys[11, 1]) : Input.GetKey(assinedKeys[11, 0]) || Input.GetKey(assinedKeys[11, 1]); }
 
     public static bool GetActionKeyPressed()
     {
-        return GetSwitch() || GetClockwise() || GetCounterclockwise() || GetNumberKeyPressed() || GetPlayerUp() || GetPlayerRight() || GetPlayerDown() || GetPlayerLeft();
+        return GetPlayerUp() || GetPlayerRight() || GetPlayerDown() || GetPlayerLeft();
     }
 
     public static bool GetCommandKeyPressed()

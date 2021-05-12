@@ -7,13 +7,16 @@ using String = System.String;
 
 public class Menu : MonoBehaviour
 {
-    private enum MenuState { Menu }
+    private enum MenuState { Menu, Controls }
     private MenuState state;
 
-    private const int optionNumber = 2;
+    private const int optionNumber = 3;
     private GameObject[] optionObjects;
     private Option[] options;
     private int selectedOption;
+
+    private GameObject keyMappingObject;
+    private Keyboard keyMapping;
 
     // options: resume, key, main menu
 
@@ -26,6 +29,8 @@ public class Menu : MonoBehaviour
             optionObjects[i] = General.AddChild(gameObject, "Option" + i);
             options[i] = optionObjects[i].AddComponent<Option>();
         }
+        keyMappingObject = General.AddChild(gameObject, "Key Mapping");
+        keyMapping = keyMappingObject.AddComponent<Keyboard>();
     }
     public void Initialize()
     {
@@ -35,12 +40,15 @@ public class Menu : MonoBehaviour
             optionObjects[i].transform.localPosition = Vector3.up * (1.5f - i * 1.2f);
         }
         options[0].ChangeText("Resume");
-        options[1].ChangeText("Return to main menu");
+        options[1].ChangeText("Controls");
+        options[2].ChangeText("Return to main menu");
 
         state = MenuState.Menu;
         selectedOption = 0;
         options[selectedOption].SetSelected(true);
         for (int i = 1; i < optionNumber; i++) options[selectedOption].SetSelected(false);
+        keyMappingObject.SetActive(false);
+        keyMapping.InitializeNonStatic();
     }
 
     // return true if there was an input
@@ -63,17 +71,19 @@ public class Menu : MonoBehaviour
                     }
                 }
 
-                if (Keyboard.GetDown() && selectedOption < optionNumber - 1)
+                if (Keyboard.GetDown())
                 {
                     options[selectedOption].SetSelected(false);
                     selectedOption++;
+                    if (selectedOption >= optionNumber) selectedOption = 0;
                     options[selectedOption].SetSelected(true);
                     return true;
                 }
-                else if (Keyboard.GetUp() && selectedOption > 0)
+                else if (Keyboard.GetUp())
                 {
                     options[selectedOption].SetSelected(false);
                     selectedOption--;
+                    if (selectedOption < 0) selectedOption = optionNumber - 1;
                     options[selectedOption].SetSelected(true);
                     return true;
                 }
@@ -88,6 +98,12 @@ public class Menu : MonoBehaviour
                             gameObject.SetActive(false);
                             return true;
                         case 1:
+                            state = MenuState.Controls;
+                            keyMappingObject.SetActive(true);
+                            keyMapping.ResetPosition();
+                            for (int i = 0; i < optionNumber; i++) optionObjects[i].SetActive(false);
+                            return true;
+                        case 2:
                             SceneLoader.sceneEvent.Invoke("TitleScene");
                             return true;
                     }
@@ -98,6 +114,15 @@ public class Menu : MonoBehaviour
                     options[selectedOption].SetSelected(true);
                     for (int i = 1; i < optionNumber; i++) options[selectedOption].SetSelected(false);
                     gameObject.SetActive(false);
+                    return true;
+                }
+                return false;
+            case MenuState.Controls:
+                if (keyMapping.HandleInput())
+                {
+                    keyMappingObject.SetActive(false);
+                    for (int i = 0; i < optionNumber; i++) optionObjects[i].SetActive(true);
+                    state = MenuState.Menu;
                     return true;
                 }
                 return false;
